@@ -146,7 +146,7 @@ namespace StorybrewCommon.Storyboarding
             addStaticCommands(segment, startTime);
 
             fragmentationTimes.RemoveWhere(t => t < endTime);
-            commands.RemoveAll(c => c.EndTime <= endTime);
+            commands.RemoveAll(c => Math.Floor(c.EndTime) <= endTime);
 
             return segment;
         }

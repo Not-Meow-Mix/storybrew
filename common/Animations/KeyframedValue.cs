@@ -7,9 +7,9 @@ namespace StorybrewCommon.Animations
 {
     public class KeyframedValue<TValue> : MarshalByRefObject, IEnumerable<Keyframe<TValue>>
     {
-        private List<Keyframe<TValue>> keyframes = new List<Keyframe<TValue>>();
-        private readonly Func<TValue, TValue, double, TValue> interpolate;
-        private readonly TValue defaultValue;
+        List<Keyframe<TValue>> keyframes = new List<Keyframe<TValue>>();
+        readonly Func<TValue, TValue, double, TValue> interpolate;
+        readonly TValue defaultValue;
 
         public double StartTime => keyframes.Count == 0 ? 0 : keyframes[0].Time;
         public double EndTime => keyframes.Count == 0 ? 0 : keyframes[keyframes.Count - 1].Time;
@@ -184,7 +184,7 @@ namespace StorybrewCommon.Animations
             }
         }
 
-        private static Keyframe<TValue> editKeyframe(Keyframe<TValue> keyframe, Func<TValue, TValue> edit = null)
+        static Keyframe<TValue> editKeyframe(Keyframe<TValue> keyframe, Func<TValue, TValue> edit = null)
             => edit != null ? new Keyframe<TValue>(keyframe.Time, edit(keyframe.Value), keyframe.Ease) : keyframe;
 
         public void Clear() => keyframes.Clear();
@@ -192,7 +192,7 @@ namespace StorybrewCommon.Animations
         public IEnumerator<Keyframe<TValue>> GetEnumerator() => keyframes.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private int indexFor(Keyframe<TValue> keyframe, bool before)
+        int indexFor(Keyframe<TValue> keyframe, bool before)
         {
             var index = keyframes.BinarySearch(keyframe);
             if (index >= 0)
@@ -204,7 +204,7 @@ namespace StorybrewCommon.Animations
             else index = ~index;
             return index;
         }
-        private int indexAt(double time, bool before)
+        int indexAt(double time, bool before)
             => indexFor(new Keyframe<TValue>(time), before);
 
         #region Manipulation
@@ -333,7 +333,7 @@ namespace StorybrewCommon.Animations
         }
 
         // Douglas Peucker
-        private void getSimplifiedKeyframeIndexes(ref List<int> keyframesToKeep, int firstPoint, int lastPoint, double tolerance, Func<Keyframe<TValue>, Keyframe<TValue>, Keyframe<TValue>, double> getDistance)
+        void getSimplifiedKeyframeIndexes(ref List<int> keyframesToKeep, int firstPoint, int lastPoint, double tolerance, Func<Keyframe<TValue>, Keyframe<TValue>, Keyframe<TValue>, double> getDistance)
         {
             var start = keyframes[firstPoint];
             var end = keyframes[lastPoint];

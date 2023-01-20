@@ -1,4 +1,4 @@
-﻿#if DEBUG
+﻿
 using OpenTK;
 using StorybrewCommon.Animations;
 using System;
@@ -57,4 +57,3 @@ namespace StorybrewCommon.Storyboarding3d
         }
     }
 }
-#endif

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using BrewLib.Graphics.Drawables;
+using OpenTK;
 using StorybrewCommon.Mapset;
 using StorybrewCommon.Storyboarding.Commands;
 using StorybrewCommon.Storyboarding.CommandValues;
@@ -15,7 +16,7 @@ namespace StorybrewCommon.Storyboarding
     {
         public static readonly Vector2 DefaultPosition = new Vector2(320, 240);
 
-        private readonly List<ICommand> commands = new List<ICommand>();
+        public readonly List<ICommand> commands = new List<ICommand>();
         private CommandGroup currentCommandGroup;
         public bool InGroup => currentCommandGroup != null;
 
@@ -263,6 +264,13 @@ namespace StorybrewCommon.Storyboarding
             else throw new NotSupportedException($"Failed to add command: No support for adding command of type {command.GetType().FullName}");
         }
 
+        public int RemoveFade()
+        {
+            clearFade();
+            return commands.RemoveAll((c) => c is FadeCommand fadeCommand);
+        }
+
+
         #region Display 
 
         private readonly List<KeyValuePair<Predicate<ICommand>, IAnimatedValueBuilder>> displayValueBuilders = new List<KeyValuePair<Predicate<ICommand>, IAnimatedValueBuilder>>();
@@ -326,6 +334,11 @@ namespace StorybrewCommon.Storyboarding
         {
             foreach (var builders in displayValueBuilders)
                 builders.Value.EndDisplayComposite();
+        }
+
+        private void clearFade()
+        {
+            fadeTimeline.Clear();
         }
 
         #endregion
