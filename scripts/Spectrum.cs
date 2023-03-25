@@ -12,50 +12,28 @@ namespace StorybrewScripts
     /// </summary>
     public class Spectrum : StoryboardObjectGenerator
     {
-        [Configurable]
-        public int StartTime = 0;
+        [Group("Timing")]
+        [Configurable] public int StartTime = 0;
+        [Configurable] public int EndTime = 10000;
+        [Configurable] public int BeatDivisor = 16;
 
-        [Configurable]
-        public int EndTime = 10000;
+        [Group("Sprite")]
+        [Configurable] public string SpritePath = "sb/bar.png";
+        [Configurable] public OsbOrigin SpriteOrigin = OsbOrigin.BottomLeft;
+        [Configurable] public Vector2 SpriteScale = new Vector2(1, 100);
 
-        [Configurable]
-        public Vector2 Position = new Vector2(0, 400);
+        [Group("Bars")]
+        [Configurable] public Vector2 Position = new Vector2(0, 400);
+        [Configurable] public float Width = 640;
+        [Configurable] public int BarCount = 96;
+        [Configurable] public int LogScale = 600;
+        [Configurable] public OsbEasing FftEasing = OsbEasing.InExpo;
+        [Configurable] public float MinimalHeight = 0.05f;
 
-        [Configurable]
-        public float Width = 640;
-
-        [Configurable]
-        public int BeatDivisor = 16;
-
-        [Configurable]
-        public int BarCount = 96;
-
-        [Configurable]
-        public string SpritePath = "sb/bar.png";
-
-        [Configurable]
-        public OsbOrigin SpriteOrigin = OsbOrigin.BottomLeft;
-
-        [Configurable]
-        public Vector2 Scale = new Vector2(1, 100);
-
-        [Configurable]
-        public int LogScale = 600;
-
-        [Configurable]
-        public double Tolerance = 0.2;
-
-        [Configurable]
-        public int CommandDecimals = 1;
-
-        [Configurable]
-        public float MinimalHeight = 0.05f;
-
-        [Configurable]
-        public OsbEasing FftEasing = OsbEasing.InExpo;
-
-        [Configurable]
-        public int FrequencyCutOff = 16000;
+        [Group("Optimization")]
+        [Configurable] public double Tolerance = 0.2;
+        [Configurable] public int CommandDecimals = 1;
+        [Configurable] public int FrequencyCutOff = 16000;
 
         public override void Generate()
         {
@@ -80,7 +58,7 @@ namespace StorybrewScripts
                 var fft = GetFft(time + fftOffset, BarCount, null, FftEasing, FrequencyCutOff);
                 for (var i = 0; i < BarCount; i++)
                 {
-                    var height = (float)Math.Log10(1 + fft[i] * LogScale) * Scale.Y / bitmap.Height;
+                    var height = (float)Math.Log10(1 + fft[i] * LogScale) * SpriteScale.Y / bitmap.Height;
                     if (height < MinimalHeight) height = MinimalHeight;
 
                     heightKeyframes[i].Add(time, height);
@@ -99,7 +77,7 @@ namespace StorybrewScripts
                 bar.ColorHsb(StartTime, (i * 360.0 / BarCount) + Random(-10.0, 10.0), 0.6 + Random(0.4), 1);
                 bar.Additive(StartTime, EndTime);
 
-                var scaleX = Scale.X * barWidth / bitmap.Width;
+                var scaleX = SpriteScale.X * barWidth / bitmap.Width;
                 scaleX = (float)Math.Floor(scaleX * 10) / 10.0f;
 
                 var hasScale = false;

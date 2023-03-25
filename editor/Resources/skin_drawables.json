@@ -161,6 +161,14 @@
 			Outset: [-8, 0],
 		},
 
+		"groupBg":
+		{
+			_type: "Sprite",
+			Texture: "ui-stripes.png",
+			Color: "@colorGroupBg",
+			ScaleMode: "Fill",
+		},
+
 		"previewBg":
 		{
 			_type: "NinePatch",

@@ -136,8 +136,9 @@ namespace StorybrewCommon.Scripting
 
         #region Random
 
-        [Configurable(DisplayName = "Random seed")]
-        public int RandomSeed;
+        [Group("Common")]
+        [Description("Changes the result of Random(...) calls.")]
+        [Configurable] public int RandomSeed;
 
         private Random random;
         public int Random(int minValue, int maxValue) => random.Next(minValue, maxValue);
@@ -228,7 +229,7 @@ namespace StorybrewCommon.Scripting
         public FontGenerator LoadFont(string directory, bool asAsset, FontDescription description, params FontEffect[] effects)
         {
             var assetDirectory = asAsset ? context.ProjectAssetPath : context.MapsetPath;
-            
+
             var fontDirectory = Path.GetFullPath(Path.Combine(assetDirectory, directory));
             if (fontDirectories.Contains(fontDirectory))
                 throw new InvalidOperationException($"This effect already generated a font inside \"{fontDirectory}\"");
@@ -308,9 +309,9 @@ namespace StorybrewCommon.Scripting
 
                 try
                 {
-                    var displayName = configurableField.Attribute.DisplayName ?? field.Name;
+                    var displayName = configurableField.Attribute.DisplayName;
                     var initialValue = Convert.ChangeType(configurableField.InitialValue, fieldType, CultureInfo.InvariantCulture);
-                    config.UpdateField(field.Name, displayName, configurableField.Order, fieldType, initialValue, allowedValues);
+                    config.UpdateField(field.Name, displayName, configurableField.Description, configurableField.Order, fieldType, initialValue, allowedValues, configurableField.BeginsGroup);
 
                     var value = config.GetValue(field.Name);
                     field.SetValue(this, value);
@@ -353,23 +354,25 @@ namespace StorybrewCommon.Scripting
             var type = GetType();
             foreach (var field in type.GetFields())
             {
-                foreach (var attribute in field.GetCustomAttributes(true))
+                var configurable = field.GetCustomAttribute<ConfigurableAttribute>(true);
+                if (configurable == null)
+                    continue;
+
+                if (!field.FieldType.IsEnum && !ObjectSerializer.Supports(field.FieldType.FullName))
+                    continue;
+
+                var group = field.GetCustomAttribute<GroupAttribute>(true);
+                var description = field.GetCustomAttribute<DescriptionAttribute>(true);
+
+                configurableFields.Add(new ConfigurableField()
                 {
-                    var configurable = attribute as ConfigurableAttribute;
-                    if (configurable == null) continue;
-
-                    if (!field.FieldType.IsEnum && !ObjectSerializer.Supports(field.FieldType.FullName))
-                        continue;
-
-                    configurableFields.Add(new ConfigurableField()
-                    {
-                        Field = field,
-                        Attribute = configurable,
-                        InitialValue = field.GetValue(this),
-                        Order = order++,
-                    });
-                    break;
-                }
+                    Field = field,
+                    Attribute = configurable,
+                    InitialValue = field.GetValue(this),
+                    BeginsGroup = group?.Name?.Trim(),
+                    Description = description?.Content?.Trim(),
+                    Order = order++,
+                });
             }
         }
 
@@ -378,6 +381,8 @@ namespace StorybrewCommon.Scripting
             public FieldInfo Field;
             public ConfigurableAttribute Attribute;
             public object InitialValue;
+            public string BeginsGroup;
+            public string Description;
             public int Order;
 
             public override string ToString() => $"{Field.Name} {InitialValue}";

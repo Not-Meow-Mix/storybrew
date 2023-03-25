@@ -11,68 +11,42 @@ namespace StorybrewScripts
 {
     public class Lyrics : StoryboardObjectGenerator
     {
-        [Configurable]
-        public string SubtitlesPath = "lyrics.srt";
+        [Description("Path to a .sbv, .srt, .ass or .ssa file in your project's folder.\nThese can be made with a tool like aegisub.")]
+        [Configurable] public string SubtitlesPath = "lyrics.srt";
+        [Configurable] public float SubtitleY = 400;
 
-        [Configurable]
-        public string FontName = "Verdana";
+        [Group("Font")]
+        [Description("The name of a system font, or the path to a font relative to your project's folder.\nIt is preferable to add fonts to the project folder and use their file name rather than installing fonts.")]
+        [Configurable] public string FontName = "Verdana";
+        [Description("A path inside your mapset's folder where lyrics images will be generated.")]
+        [Configurable] public string SpritesPath = "sb/f";
+        [Description("The Size of the font.\nIncreasing the font size creates larger images.")]
+        [Configurable] public int FontSize = 26;
+        [Description("The Scale of the font.\nIncreasing the font scale does not creates larger images, but the result may be blurrier.")]
+        [Configurable] public float FontScale = 0.5f;
+        [Configurable] public Color4 FontColor = Color4.White;
+        [Configurable] public FontStyle FontStyle = FontStyle.Regular;
 
-        [Configurable]
-        public string SpritesPath = "sb/f";
+        [Group("Outline")]
+        [Configurable] public int OutlineThickness = 3;
+        [Configurable] public Color4 OutlineColor = new Color4(50, 50, 50, 200);
 
-        [Configurable]
-        public int FontSize = 26;
+        [Group("Shadow")]
+        [Configurable] public int ShadowThickness = 0;
+        [Configurable] public Color4 ShadowColor = new Color4(0, 0, 0, 100);
 
-        [Configurable]
-        public float FontScale = 0.5f;
+        [Group("Glow")]
+        [Configurable] public int GlowRadius = 0;
+        [Configurable] public Color4 GlowColor = new Color4(255, 255, 255, 100);
+        [Configurable] public bool GlowAdditive = true;
 
-        [Configurable]
-        public Color4 FontColor = Color4.White;
-
-        [Configurable]
-        public FontStyle FontStyle = FontStyle.Regular;
-
-        [Configurable]
-        public int GlowRadius = 0;
-
-        [Configurable]
-        public Color4 GlowColor = new Color4(255, 255, 255, 100);
-
-        [Configurable]
-        public bool AdditiveGlow = true;
-
-        [Configurable]
-        public int OutlineThickness = 3;
-
-        [Configurable]
-        public Color4 OutlineColor = new Color4(50, 50, 50, 200);
-
-        [Configurable]
-        public int ShadowThickness = 0;
-
-        [Configurable]
-        public Color4 ShadowColor = new Color4(0, 0, 0, 100);
-
-        [Configurable]
-        public Vector2 Padding = Vector2.Zero;
-
-        [Configurable]
-        public float SubtitleY = 400;
-
-        [Configurable]
-        public bool PerCharacter = true;
-
-        [Configurable]
-        public bool TrimTransparency = true;
-
-        [Configurable]
-        public bool EffectsOnly = false;
-
-        [Configurable]
-        public bool Debug = false;
-
-        [Configurable]
-        public OsbOrigin Origin = OsbOrigin.Centre;
+        [Group("Misc")]
+        [Configurable] public bool PerCharacter = true;
+        [Configurable] public bool TrimTransparency = true;
+        [Configurable] public bool EffectsOnly = false;
+        [Description("How much extra space is allocated around the text when generating it.\nShould be increased when characters look cut off.")]
+        [Configurable] public Vector2 Padding = Vector2.Zero;
+        [Configurable] public OsbOrigin Origin = OsbOrigin.Centre;
 
         public override void Generate()
         {
@@ -85,11 +59,10 @@ namespace StorybrewScripts
                 FontStyle = FontStyle,
                 TrimTransparency = TrimTransparency,
                 EffectsOnly = EffectsOnly,
-                Debug = Debug,
             },
             new FontGlow()
             {
-                Radius = AdditiveGlow ? 0 : GlowRadius,
+                Radius = GlowAdditive ? 0 : GlowRadius,
                 Color = GlowColor,
             },
             new FontOutline()
@@ -105,7 +78,7 @@ namespace StorybrewScripts
 
             var subtitles = LoadSubtitles(SubtitlesPath);
 
-            if (GlowRadius > 0 && AdditiveGlow)
+            if (GlowRadius > 0 && GlowAdditive)
             {
                 var glowFont = LoadFont(Path.Combine(SpritesPath, "glow"), new FontDescription()
                 {
@@ -116,7 +89,6 @@ namespace StorybrewScripts
                     FontStyle = FontStyle,
                     TrimTransparency = TrimTransparency,
                     EffectsOnly = true,
-                    Debug = Debug,
                 },
                 new FontGlow()
                 {

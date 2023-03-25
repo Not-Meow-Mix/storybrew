@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace StorybrewCommon.Storyboarding
 {
@@ -31,10 +32,16 @@ namespace StorybrewCommon.Storyboarding
             }
         }
 
-        public void UpdateField(string name, string displayName, int order, Type fieldType, object defaultValue, NamedValue[] allowedValues)
+        public void UpdateField(string name, string displayName, string description, int order, Type fieldType, object defaultValue, NamedValue[] allowedValues, string beginsGroup)
         {
             if (fieldType == null)
                 return;
+
+            if (displayName == null)
+            {
+                displayName = Regex.Replace(name, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1 $2");
+                displayName = Regex.Replace(displayName, @"(\p{Ll})(\P{Ll})", "$1 $2");
+            }
 
             var value = fields.TryGetValue(name, out ConfigField field) ?
                 convertFieldValue(field.Value, field.Type, fieldType, defaultValue) :
@@ -55,9 +62,11 @@ namespace StorybrewCommon.Storyboarding
             {
                 Name = name,
                 DisplayName = displayName,
+                Description = description?.Trim(),
                 Value = value,
                 Type = fieldType,
                 AllowedValues = allowedValues,
+                BeginsGroup = beginsGroup,
                 Order = order,
             };
         }
@@ -76,9 +85,11 @@ namespace StorybrewCommon.Storyboarding
             {
                 Name = field.Name,
                 DisplayName = field.DisplayName,
+                Description = field.Description,
                 Value = value,
                 Type = field.Type,
                 AllowedValues = field.AllowedValues,
+                BeginsGroup = field.BeginsGroup,
                 Order = field.Order,
             };
             return true;
@@ -106,9 +117,11 @@ namespace StorybrewCommon.Storyboarding
         {
             public string Name;
             public string DisplayName;
+            public string Description;
             public object Value;
             public Type Type;
             public NamedValue[] AllowedValues;
+            public string BeginsGroup;
             public int Order;
         }
     }
