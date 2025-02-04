@@ -1,6 +1,4 @@
-﻿
-#if DEBUG
-using OpenTK;
+﻿using OpenTK;
 using StorybrewCommon.Animations;
 using StorybrewCommon.Mapset;
 using StorybrewCommon.Scripting;
@@ -45,6 +43,13 @@ namespace StorybrewCommon.Storyboarding.Util
 
         public Action<State> PostProcess;
 
+        public readonly DisabledCommands DisabledCommands;
+
+        public CommandGenerator(DisabledCommands disabledCommands = DisabledCommands.None)
+        {
+            DisabledCommands = disabledCommands;
+        }
+
         public void Add(State state, bool before = false)
         {
             if (states.Count == 0 || states[states.Count - 1].Time < state.Time)
@@ -62,9 +67,6 @@ namespace StorybrewCommon.Storyboarding.Util
                 states.Insert(index, state);
             }
         }
-
-        public void ClearStates()
-            => states.Clear();
 
         public bool GenerateCommands(OsbSprite sprite, Action<Action, OsbSprite> action = null, double? startTime = null, double? endTime = null, double timeOffset = 0, bool loopable = false)
             => GenerateCommands(sprite, OsuHitObject.WidescreenStoryboardBounds, action, startTime, endTime, timeOffset, loopable);
@@ -173,14 +175,14 @@ namespace StorybrewCommon.Storyboarding.Util
 
         private void addKeyframes(State state, double time)
         {
-            positions.Add(time, state.Position);
-            scales.Add(time, state.Scale);
-            rotations.Add(time, (float)state.Rotation);
-            colors.Add(time, state.Color);
-            opacities.Add(time, (float)state.Opacity);
-            flipH.Add(time, state.FlipH);
-            flipV.Add(time, state.FlipV);
-            additive.Add(time, state.Additive);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Move)) positions.Add(time, state.Position);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Scale)) scales.Add(time, state.Scale);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Rotate)) rotations.Add(time, (float)state.Rotation);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Color)) colors.Add(time, state.Color);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Fade)) opacities.Add(time, (float)state.Opacity);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.FlipH)) flipH.Add(time, state.FlipH);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.FlipV)) flipV.Add(time, state.FlipV);
+            if (!this.DisabledCommands.HasFlag(DisabledCommands.Additive)) additive.Add(time, state.Additive);
         }
 
         private void clearFinalKeyframes()
@@ -248,5 +250,18 @@ namespace StorybrewCommon.Storyboarding.Util
                 => Math.Sign(Time - other.Time);
         }
     }
+
+    [Flags]
+    public enum DisabledCommands
+    {
+        None = 0, 
+        Move = 1,
+        Scale = 2, 
+        Rotate = 4, 
+        Color = 8,
+        Fade = 16,
+        FlipH = 32,
+        FlipV = 64,
+        Additive = 128
+    }
 }
-#endif

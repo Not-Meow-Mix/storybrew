@@ -1,4 +1,4 @@
-﻿#if DEBUG
+﻿
 using OpenTK;
 using StorybrewCommon.Animations;
 using StorybrewCommon.Storyboarding;
@@ -16,16 +16,26 @@ namespace StorybrewCommon.Storyboarding3d
         public bool Additive;
         public RotationMode RotationMode = RotationMode.UnitY;
         public bool UseDistanceFade = true;
+        public int CommandSplitThreshold = 10;
+        public Vector2 InitialPosition = new Vector2(320, -240);
 
         public readonly KeyframedValue<Vector2> SpriteScale = new KeyframedValue<Vector2>(InterpolatingFunctions.Vector2, Vector2.One);
         public readonly KeyframedValue<double> SpriteRotation = new KeyframedValue<double>(InterpolatingFunctions.DoubleAngle, 0);
 
-        public readonly CommandGenerator Generator = new CommandGenerator();
+        public readonly CommandGenerator Generator;
+
+
+        public Sprite3d(DisabledCommands disabledCommands = DisabledCommands.None)
+        {
+            Generator = new CommandGenerator(disabledCommands);
+        }
+
         public override IEnumerable<CommandGenerator> CommandGenerators { get { yield return Generator; } }
 
         public override void GenerateSprite(StoryboardSegment segment)
         {
-            sprite = sprite ?? segment.CreateSprite(SpritePath, SpriteOrigin);
+            sprite = sprite ?? segment.CreateSprite(SpritePath, SpriteOrigin, InitialPosition);
+            sprite.CommandSplitThreshold = CommandSplitThreshold;
         }
 
         public override void GenerateStates(double time, CameraState cameraState, Object3dState object3dState)
@@ -79,6 +89,40 @@ namespace StorybrewCommon.Storyboarding3d
         {
             Generator.GenerateCommands(sprite, action, startTime, endTime, timeOffset, loopable);
         }
+
+        public void AddPosition(double time, Vector3 position, OsbEasing easing = OsbEasing.None)
+        {
+            if (easing == OsbEasing.None)
+            {
+                PositionX.Add(time, position.X);
+                PositionY.Add(time, position.Y);
+                PositionZ.Add(time, position.Z);
+            }
+            else
+            {
+                PositionX.Add(time, position.X, easing.ToEasingFunction());
+                PositionY.Add(time, position.Y, easing.ToEasingFunction());
+                PositionZ.Add(time, position.Z, easing.ToEasingFunction());
+            }
+
+        }
+
+        public void AddScale(double time, Vector3 scale, OsbEasing easing = OsbEasing.None)
+        {
+            if (easing == OsbEasing.None)
+            {
+                ScaleX.Add(time, scale.X);
+                ScaleY.Add(time, scale.Y);
+                ScaleZ.Add(time, scale.Z);
+            }
+            else
+            {
+                ScaleX.Add(time, scale.X, easing.ToEasingFunction());
+                ScaleY.Add(time, scale.Y, easing.ToEasingFunction());
+                ScaleZ.Add(time, scale.Z, easing.ToEasingFunction());
+            }
+
+        }
     }
 
     public enum RotationMode
@@ -88,4 +132,3 @@ namespace StorybrewCommon.Storyboarding3d
         UnitY,
     }
 }
-#endif

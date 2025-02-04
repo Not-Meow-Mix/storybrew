@@ -63,6 +63,11 @@ namespace StorybrewCommon.Storyboarding.Display
             else triggerable.OnStateChanged -= triggerable_OnStateChanged;
         }
 
+        public void Clear()
+        {
+            commands.Clear();
+        }
+
         public bool IsActive(double time)
             => commands.Count > 0 && StartTime <= time && time <= EndTime;
 
