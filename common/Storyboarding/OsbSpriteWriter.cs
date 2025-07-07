@@ -146,7 +146,10 @@ namespace StorybrewCommon.Storyboarding
                 var eTime = Math.Min(endTime, (int)Math.Round(cmd.EndTime));
 
                 IFragmentableCommand command;
-                if (sTime != (int)Math.Round(cmd.StartTime) || eTime != (int)Math.Round(cmd.EndTime))
+                // eTime - 1 to remove flickers from transparent sprites showing up twice in the same millisecond
+                if (eTime == endTime)
+                    command = cmd.GetFragment(sTime, eTime - 1);
+                else if (sTime != (int)Math.Round(cmd.StartTime) || eTime != (int)Math.Round(cmd.EndTime))
                     command = cmd.GetFragment(sTime, eTime);
                 else command = cmd;
 

@@ -31,14 +31,14 @@ namespace StorybrewCommon.Storyboarding.Util
         public State EndState => states.Count == 0 ? null : states[states.Count - 1];
 
         public double PositionTolerance = 1;
-        public double ScaleTolerance = 0.1;
-        public double RotationTolerance = 0.001;
+        public double ScaleTolerance = 0.0001;
+        public double RotationTolerance = 0.0001;
         public double ColorTolerance = 2;
         public double OpacityTolerance = 0.01;
 
         public int PositionDecimals = 1;
-        public int ScaleDecimals = 2;
-        public int RotationDecimals = 3;
+        public int ScaleDecimals = 4;
+        public int RotationDecimals = 4;
         public int OpacityDecimals = 2;
 
         public Action<State> PostProcess;
